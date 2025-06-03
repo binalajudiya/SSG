@@ -308,7 +308,7 @@ export default function Home({ table, assets }) {
                 link.href = url.toString();
               }
             } catch (e) {
-              // Handlesdasasa invalid URLs if needed
+              // Handlesddgfasasa invalid URLs if needed
             }
           });
         });
