@@ -48,7 +48,7 @@ export async function getStaticProps() {
         table,
         assets,
       },
-      revalidate: 60,
+      // revalidate: 60,
     };
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -282,6 +282,37 @@ export default function Home({ table, assets }) {
           </symbol>
         </svg>
       </div>
+      {/* Your Vanilla JS Script */}
+      <script dangerouslySetInnerHTML={{ __html: `
+        document.addEventListener('DOMContentLoaded', function () {
+          const keysToAppend = ['gclid', 'wbraid', 'gbraid'];
+          const currentParams = new URLSearchParams(window.location.search);
+          const appendParams = new URLSearchParams();
+          keysToAppend.forEach(key => {
+            const value = currentParams.get(key);
+            if (value !== null) {
+              appendParams.set(key, value);
+            }
+          });
+          const targetHostname = "cf." + window.location.hostname;
+          const clickPathRegex = /^\\/click\\/(?:[1-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9]|6[0-9])$/;
+          document.querySelectorAll('a[href]').forEach(link => {
+            try {
+              const url = new URL(link.href);
+              if (url.hostname === targetHostname && clickPathRegex.test(url.pathname)) {
+                const linkParams = new URLSearchParams(url.search);
+                appendParams.forEach((value, key) => {
+                  linkParams.set(key, value);
+                });
+                url.search = linkParams.toString();
+                link.href = url.toString();
+              }
+            } catch (e) {
+              // Handle invalid URLs if needed
+            }
+          });
+        });
+      `}} />
     </div>
   );
 }
