@@ -7,7 +7,7 @@ const GITHUB_REPO = 'SSG';          // Your GitHub repository name
 const GITHUB_WORKFLOW_FILE = 'deploy.yml'; // The name of your workflow file
 
 // It's highly recommended to use a secret from Sanity for security
-const SANITY_WEBHOOK_SECRET = process.env.SANITY_WEBHOOK_SECRET; // Will set in next step
+const TEST_NETLIFY_FUNCTION_KEY = process.env.TEST_NETLIFY_FUNCTION_KEY; // Will set in next step
 
 exports.handler = async function(event, context) {
     if (event.httpMethod !== 'POST') {
@@ -26,10 +26,10 @@ exports.handler = async function(event, context) {
         // --- Optional: Verify Sanity Webhook Secret (Highly Recommended) ---
         // Sanity sends a HMAC-SHA256 signature in the 'X-Sanity-Signature' header
         // You generate the expected signature and compare
-        if (SANITY_WEBHOOK_SECRET) {
+        if (TEST_NETLIFY_FUNCTION_KEY) {
             const crypto = require('crypto');
             const signature = event.headers['x-sanity-signature'];
-            const hmac = crypto.createHmac('sha256', SANITY_WEBHOOK_SECRET);
+            const hmac = crypto.createHmac('sha256', TEST_NETLIFY_FUNCTION_KEY);
             const digest = hmac.update(event.body).digest('hex');
 
             if (!signature || signature !== digest) {
