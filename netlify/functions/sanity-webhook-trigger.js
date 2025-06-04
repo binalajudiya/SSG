@@ -14,23 +14,30 @@ exports.handler = async function(event, context) {
 
         // --- Sanity Webhook Secret Verification (with all header logs) ---
         if (SANITY_GH_ACTIONS_WEBHOOK_SECRET) {
-            const signature = event.headers['sanity-webhook-signature']; // This is what Sanity sent
-            const hmac = crypto.createHmac('sha256', SANITY_GH_ACTIONS_WEBHOOK_SECRET);
-            const digest = hmac.update(event.body).digest('hex');
+            const receivedSignatureHeader = event.headers['sanity-webhook-signature']; // Get the full header string
+            const hmac = crypto.createHmac('sha256', SANITY_WEBHOOK_SECRET);
+            const digest = hmac.update(event.body).digest('hex'); // Use RAW event.body
+
+            // --- NEW CODE TO PARSE THE SIGNATURE HEADER ---
+            let signatureToCompare;
+            if (receivedSignatureHeader) {
+                const parts = receivedSignatureHeader.split(',').map(part => part.trim());
+                const v1Part = parts.find(part => part.startsWith('v1='));
+                if (v1Part) {
+                    signatureToCompare = v1Part.substring(3); // Extract the part after 'v1='
+                }
+            }
+            // --- END NEW CODE ---
 
             console.log('--- Sanity Signature Debugging ---');
             console.log('Expected Digest (from function):', digest);
-            console.log('Received Signature (from Sanity):', signature); // Still 'undefined'
-            console.log('Length of SANITY_GH_ACTIONS_WEBHOOK_SECRET (in func):', SANITY_GH_ACTIONS_WEBHOOK_SECRET.length);
-
-            // --- ADD THIS LINE TO LOG ALL HEADERS ---
-            console.log('ALL INCOMING HEADERS:', event.headers);
-            // --- END OF NEW LINE ---
-
+            console.log('Received Signature (from Sanity - v1 part):', signatureToCompare); // Now logs just the v1 part
+            console.log('Length of SANITY_GH_ACTIONS_WEBHOOK_SECRET (in func):', SANITY_WEBHOOK_SECRET.length);
+            console.log('ALL INCOMING HEADERS:', event.headers); // Keep for now
             console.log('--- End Sanity Signature Debugging ---');
 
-
-            if (!signature || signature !== digest) {
+            // --- MODIFIED COMPARISON ---
+            if (!signatureToCompare || signatureToCompare !== digest) {
                 console.warn('Sanity webhook signature mismatch!');
                 return { statusCode: 401, body: 'Unauthorized: Invalid Sanity signature' };
             }
