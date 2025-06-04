@@ -1,36 +1,31 @@
 // netlify/functions/sanity-webhook-trigger.js
-const fetch = require('node-fetch'); // Use require for commonjs in Netlify Functions
+const fetch = require('node-fetch');
+const crypto = require('crypto'); // Ensure crypto is imported here if not already
 
-// Replace with your GitHub details
-const GITHUB_OWNER = 'binalajudiya'; // Your GitHub username/organization
-const GITHUB_REPO = 'SSG';          // Your GitHub repository name
-const GITHUB_WORKFLOW_FILE = 'deploy.yml'; // The name of your workflow file
+// ... (rest of your existing code for GITHUB_OWNER, GITHUB_REPO, etc.) ...
 
-// It's highly recommended to use a secret from Sanity for security
-const SANITY_WEBHOOK_SECRET = process.env.SANITY_GH_ACTIONS_WEBHOOK_SECRET; // Will set in next step
+const SANITY_WEBHOOK_SECRET = process.env.SANITY_GH_ACTIONS_WEBHOOK_SECRET; // Or SANITY_GH_ACTIONS_WEBHOOK_SECRET
 
 exports.handler = async function(event, context) {
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Method Not Allowed' };
-    }
-
-    const GITHUB_TOKEN = process.env.GITHUB_WORKFLOW_DISPATCH_TOKEN;
-    if (!GITHUB_TOKEN) {
-        console.error('GITHUB_WORKFLOW_DISPATCH_TOKEN is not set in Netlify environment variables.');
-        return { statusCode: 500, body: 'Server configuration error: GitHub token missing.' };
-    }
+    // ... (rest of your existing code for httpMethod check and GITHUB_TOKEN check) ...
 
     try {
+        // Keep this parsing, but ensure the HMAC uses the raw event.body
         const body = JSON.parse(event.body);
 
-        // --- Optional: Verify Sanity Webhook Secret (Highly Recommended) ---
-        // Sanity sends a HMAC-SHA256 signature in the 'X-Sanity-Signature' header
-        // You generate the expected signature and compare
+        // --- Sanity Webhook Secret Verification (with debug logs) ---
         if (SANITY_WEBHOOK_SECRET) {
-            const crypto = require('crypto');
-            const signature = event.headers['x-sanity-signature'];
+            const signature = event.headers['x-sanity-signature']; // This is what Sanity sent
             const hmac = crypto.createHmac('sha256', SANITY_WEBHOOK_SECRET);
-            const digest = hmac.update(event.body).digest('hex');
+            const digest = hmac.update(event.body).digest('hex'); // IMPORTANT: Use RAW event.body here
+
+            console.log('--- Sanity Signature Debugging ---');
+            console.log('Expected Digest (from function):', digest);
+            console.log('Received Signature (from Sanity):', signature);
+            // console.log('Raw Event Body (from Sanity):', event.body); // UNCOMMENT WITH CAUTION - MAY CONTAIN SENSITIVE DATA
+            console.log('Length of SANITY_WEBHOOK_SECRET (in func):', SANITY_WEBHOOK_SECRET.length);
+            console.log('--- End Sanity Signature Debugging ---');
+
 
             if (!signature || signature !== digest) {
                 console.warn('Sanity webhook signature mismatch!');
@@ -39,37 +34,7 @@ exports.handler = async function(event, context) {
         }
         // --- End Sanity Webhook Secret Verification ---
 
-        console.log('Received Sanity webhook. Triggering GitHub Actions workflow...');
-
-        const response = await fetch(`https://api.github.com/repos/<span class="math-inline">\{GITHUB\_OWNER\}/</span>{GITHUB_REPO}/actions/workflows/${GITHUB_WORKFLOW_FILE}/dispatches`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${GITHUB_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json',
-                'X-GitHub-Api-Version': '2022-11-28',
-                'User-Agent': 'Netlify-Sanity-Webhook-Trigger' // Required by GitHub API
-            },
-            body: JSON.stringify({
-                ref: 'main', // The branch where your 'deploy.yml' workflow resides
-                // You can pass inputs to your workflow if needed, e.g.:
-                // inputs: {
-                //    message: 'Sanity content updated'
-                // }
-            })
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`GitHub API error: ${response.status} - ${errorText}`);
-            return { statusCode: response.status, body: `Failed to trigger GitHub Actions: ${errorText}` };
-        }
-
-        console.log('Successfully dispatched GitHub Actions workflow.');
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'GitHub Actions workflow dispatched successfully.' })
-        };
+        // ... (rest of your existing code for GitHub API dispatch) ...
 
     } catch (error) {
         console.error('Error processing Sanity webhook:', error);
