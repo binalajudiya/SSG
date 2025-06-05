@@ -14,20 +14,18 @@ exports.handler = async function(event, context) {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
+    console.log(SANITY_GH_ACTIONS_WEBHOOK_SECRET);
     const GITHUB_TOKEN = process.env.GITHUB_WORKFLOW_DISPATCH_TOKEN;
     if (!GITHUB_TOKEN) {
         console.error('GITHUB_WORKFLOW_DISPATCH_TOKEN is not set in Netlify environment variables.');
         return { statusCode: 500, body: 'Server configuration error: GitHub token missing.' };
     }
-    console.log('Received event:', JSON.stringify(event, null, 2)); // Log the entire event for debugging
-    console.log('Received headers:', JSON.stringify(event.headers, null, 2)); // Log the headers for debugging
-    console.log('Received body:', event.body); // Log the raw body for debugging
-    console.log('SANITY_GH_ACTIONS_WEBHOOK_SECRET length:', SANITY_GH_ACTIONS_WEBHOOK_SECRET ? SANITY_GH_ACTIONS_WEBHOOK_SECRET.length : 'not set'); // Log the length of the secret for debugging
-    console.log('GITHUB_WORKFLOW_DISPATCH_TOKEN length:', GITHUB_TOKEN ? GITHUB_TOKEN.length : 'not set'); // Log the length of the GitHub token for debugging
-    console.log('Event type:', event.headers['x-github-event']); // Log the GitHub event type for debugging
-    console.log('Event source:', event.headers['x-github-delivery']); // Log the GitHub delivery ID for debugging
-    console.log('Event source:', event.headers['x-sanity-webhook-signature']); // Log the Sanity webhook signature for debugging
-    console.log('Event source:', event.headers['sanity-webhook-signature']); // Log the Sanity webhook signature for debugging
+    // console.log('Received event:', JSON.stringify(event, null, 2)); // Log the entire event for debugging
+    // console.log('Received headers:', JSON.stringify(event.headers, null, 2)); // Log the headers for debugging
+    console.log('Received body:', JSON.stringify(event.body, null, 2)); // Log the raw body for debugging
+    // console.log('SANITY_GH_ACTIONS_WEBHOOK_SECRET length:', SANITY_GH_ACTIONS_WEBHOOK_SECRET ? SANITY_GH_ACTIONS_WEBHOOK_SECRET.length : 'not set'); // Log the length of the secret for debugging
+    // console.log('GITHUB_WORKFLOW_DISPATCH_TOKEN length:', GITHUB_TOKEN ? GITHUB_TOKEN.length : 'not set'); // Log the length of the GitHub token for debugging
+    
 
     try {
         //const body = JSON.parse(event.body);
