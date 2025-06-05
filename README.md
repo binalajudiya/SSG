@@ -100,7 +100,6 @@ graph TD
     E1 --(pulls from)--> D3;
     E1 --(runs post-pull commands:<br>npm install, npm build)--> F2;
 
-
     %% Specifics on data/secrets
     B1 -.Secret: SANITY_WEBHOOK_SECRET.- C1;
     B2 -.Secret: SANITY_GH_ACTIONS_WEBHOOK_SECRET.- C2;
@@ -109,3 +108,4 @@ graph TD
     D5 -.Holds: GH_PAGES_TOKEN,<br>GITHUB_ACTION_DEPLOY_TEMP_V3.- D2;
     D4 -.Parameters: server_id, app_id, git_url, branch_name.- E2;
     E2 -.Uses: API_KEY, EMAIL.- E3;
+```
