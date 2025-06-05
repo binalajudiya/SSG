@@ -1,42 +1,41 @@
 # My Deployment Workflow
-
 Here's a diagram illustrating our automated deployment process:
 
 ```mermaid
 graph TD
     %% Define main components/subgraphs
-    subgraph Sanity Studio (CMS)
+    subgraph Sanity Studio [CMS]
         A[Content Update / Publish]
     end
 
     subgraph Sanity Webhooks
-        B1(Webhook 1: Netlify Deploy Hook)
-        B2(Webhook 2: Trigger GitHub Actions)
+        B1(Webhook 1:\nNetlify Deploy Hook)
+        B2(Webhook 2:\nTrigger GitHub Actions)
     end
 
-    subgraph Netlify (Hosting & Functions)
+    subgraph Netlify [Hosting & Functions]
         C1[Netlify Site: Next.js App]
-        C2[Netlify Function: sanity-webhook-trigger.js]
+        C2[Netlify Function:\nsanity-webhook-trigger.js]
         C3[Netlify Environment Variables]
     end
 
-    subgraph GitHub (Version Control & CI/CD)
+    subgraph GitHub [Version Control & CI/CD]
         D1[GitHub Repo: main branch]
-        D2[GitHub Actions: deploy.yml Workflow]
+        D2[GitHub Actions:\ndeploy.yml Workflow]
         D3[GitHub Repo: gh-pages branch]
         D4[GitHub Webhook: to Cloudways]
         D5[GitHub Repository Secrets]
     end
 
-    subgraph Cloudways (Hosting & Git Auto-Deploy)
+    subgraph Cloudways [Hosting & Git Auto-Deploy]
         E1[Cloudways Application]
-        E2[Cloudways Script: gitautodeploy.php]
+        E2[Cloudways Script:\ngitautodeploy.php]
         E3[Cloudways API Credentials]
     end
 
-    subgraph Live Sites
-        F1[Live Site (Primary): Netlify CDN]
-        F2[Live Site (Secondary/Staging): Cloudways Server]
+    subgraph Sites [Live Sites]
+        F1[Live Site: Primary\nNetlify CDN]
+        F2[Live Site: Secondary/Staging\nCloudways Server]
     end
 
     %% Define flow connections and labels
@@ -53,7 +52,7 @@ graph TD
 
     D1 -- (manual code push trigger) --> D2;
 
-    D2 -- (builds app, pulls latest Sanity data) --> A; %% Implied data fetch from Sanity
+    D2 -- (builds app, pulls latest Sanity data) --> A; 
     D2 -- (pushes built /out dir) --> D3;
 
     D3 -- (on commit push) --> D4;
@@ -62,7 +61,7 @@ graph TD
     E2 -- (authenticates & calls Cloudways API) --> E3;
     E2 -- (triggers internal git pull) --> E1;
     E1 -- pulls from --> D3;
-    E1 -- (runs post-pull commands:<br>npm install, npm build) --> F2;
+    E1 -- (runs post-pull commands:\nnpm install, npm build) --> F2;
 
 
     %% Add specific labels for data/secrets
