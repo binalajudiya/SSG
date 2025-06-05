@@ -1,7 +1,12 @@
 // netlify/functions/sanity-webhook-trigger.js
 const fetch = require('node-fetch');
-// const crypto = require('crypto'); // Ensure crypto is imported
-const verifyWebhook = require('@sanity/webhook').default; // Access the default export
+const crypto = require('crypto');
+
+// This will hold the entire module export
+const sanityWebhookModule = require('@sanity/webhook');
+// Now, explicitly access the verifyWebhook property from the module
+const verifyWebhook = sanityWebhookModule.verifyWebhook;
+
 
 
 // Replace with your GitHub details
