@@ -41,22 +41,22 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/b
 
 ```mermaid
 graph TD
-    subgraph Sanity Studio (Content Management)
+    subgraph Sanity_Studio_Content_Management
         A[Content Update / Publish]
     end
 
-    subgraph Sanity Webhooks
+    subgraph Sanity_Webhooks
         B1{Webhook 1:<br>Netlify Deploy Hook}
         B2{Webhook 2:<br>Trigger GitHub Actions}
     end
 
-    subgraph Netlify (Hosting & Functions)
+    subgraph Netlify_Hosting_and_Functions
         C1[Netlify Site: Next.js App]
         C2[Netlify Function:<br>sanity-webhook-trigger.js]
         C3[Netlify Environment Variables]
     end
 
-    subgraph GitHub (Version Control & CI/CD)
+    subgraph GitHub_Version_Control_and_CI_CD
         D1[GitHub Repo: main branch]
         D2[GitHub Actions:<br>deploy.yml Workflow]
         D3[GitHub Repo: gh-pages branch]
@@ -64,15 +64,15 @@ graph TD
         D5[GitHub Repository Secrets]
     end
 
-    subgraph Cloudways (Hosting & Git Auto-Deploy)
+    subgraph Cloudways_Hosting_and_Git_Auto_Deploy
         E1[Cloudways Application]
         E2[Cloudways Script:<br>gitautodeploy.php]
         E3[Cloudways API Credentials]
     end
 
-    subgraph Live Sites
-        F1[Live Site (Primary):<br>Netlify CDN]
-        F2[Live Site (Secondary/Staging):<br>Cloudways Server]
+    subgraph Live_Sites
+        F1[Live Site Primary:<br>Netlify CDN]
+        F2[Live Site Secondary_Staging:<br>Cloudways Server]
     end
 
     %% Flow connections
@@ -87,9 +87,9 @@ graph TD
     C2 --(receives webhook & verifies)--> C3;
     C2 --(dispatches workflow via GitHub API)--> D2;
 
-    D1 --(manual code push trigger)--> D2; %% Your developer workflow
+    D1 --(manual code push trigger)--> D2;
 
-    D2 --(builds app, pulls latest Sanity data)--> Sanity Studio; %% Implied data fetch
+    D2 --(builds app, pulls latest Sanity data)--> A;
     D2 --(pushes built /out dir)--> D3;
 
     D3 --(on commit push)--> D4;
