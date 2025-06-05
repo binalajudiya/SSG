@@ -15,7 +15,7 @@ exports.handler = async function(event, context) {
         // --- Sanity Webhook Secret Verification (with all header logs) ---
         if (SANITY_GH_ACTIONS_WEBHOOK_SECRET) {
             const receivedSignatureHeader = event.headers['sanity-webhook-signature']; // Get the full header string
-            const hmac = crypto.createHmac('sha256', SANITY_WEBHOOK_SECRET);
+            const hmac = crypto.createHmac('sha256', SANITY_GH_ACTIONS_WEBHOOK_SECRET);
             const digest = hmac.update(event.body).digest('hex'); // Use RAW event.body
 
             // --- NEW CODE TO PARSE THE SIGNATURE HEADER ---
@@ -32,7 +32,7 @@ exports.handler = async function(event, context) {
             console.log('--- Sanity Signature Debugging ---');
             console.log('Expected Digest (from function):', digest);
             console.log('Received Signature (from Sanity - v1 part):', signatureToCompare); // Now logs just the v1 part
-            console.log('Length of SANITY_GH_ACTIONS_WEBHOOK_SECRET (in func):', SANITY_WEBHOOK_SECRET.length);
+            console.log('Length of SANITY_GH_ACTIONS_WEBHOOK_SECRET (in func):', SANITY_GH_ACTIONS_WEBHOOK_SECRET.length);
             console.log('ALL INCOMING HEADERS:', event.headers); // Keep for now
             console.log('--- End Sanity Signature Debugging ---');
 
