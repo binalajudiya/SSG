@@ -14,7 +14,7 @@ exports.handler = async function(event, context) {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    console.log(SANITY_GH_ACTIONS_WEBHOOK_SECRET);
+    console.log("SANITY_GH_ACTIONS_WEBHOOK_SECRET",SANITY_GH_ACTIONS_WEBHOOK_SECRET);
     const GITHUB_TOKEN = process.env.GITHUB_WORKFLOW_DISPATCH_TOKEN;
     if (!GITHUB_TOKEN) {
         console.error('GITHUB_WORKFLOW_DISPATCH_TOKEN is not set in Netlify environment variables.');
@@ -22,21 +22,23 @@ exports.handler = async function(event, context) {
     }
     // console.log('Received event:', JSON.stringify(event, null, 2)); // Log the entire event for debugging
     // console.log('Received headers:', JSON.stringify(event.headers, null, 2)); // Log the headers for debugging
-    console.log('Received body:', JSON.stringify(event.body, null, 2)); // Log the raw body for debugging
+    // console.log('Received body:', JSON.stringify(event.body, null, 2)); // Log the raw body for debugging
     // console.log('SANITY_GH_ACTIONS_WEBHOOK_SECRET length:', SANITY_GH_ACTIONS_WEBHOOK_SECRET ? SANITY_GH_ACTIONS_WEBHOOK_SECRET.length : 'not set'); // Log the length of the secret for debugging
     // console.log('GITHUB_WORKFLOW_DISPATCH_TOKEN length:', GITHUB_TOKEN ? GITHUB_TOKEN.length : 'not set'); // Log the length of the GitHub token for debugging
     
 
     try {
         //const body = JSON.parse(event.body);
-console.log(event.headers['sanity-webhook-signature']);
         // --- Sanity Webhook Secret Verification (with all header logs) ---
         if (SANITY_GH_ACTIONS_WEBHOOK_SECRET) {
-            const receivedSignatureHeader = event.headers['sanity-webhook-signature']; // Get the full header string
             const hmac = crypto.createHmac('sha256', SANITY_GH_ACTIONS_WEBHOOK_SECRET);
             const digest = hmac.update(event.body).digest('hex'); // Use RAW event.body
+            // Convert to base64url (replace + with -, / with _, remove =)
+            digest = digest.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
             // --- NEW CODE TO PARSE THE SIGNATURE HEADER ---
+            const receivedSignatureHeader = event.headers['sanity-webhook-signature']; // Get the full header string
+            console.log('Received Signature Header:', receivedSignatureHeader); // Log the received signature header for debugging
             let signatureToCompare;
             if (receivedSignatureHeader) {
                 const parts = receivedSignatureHeader.split(',').map(part => part.trim());
@@ -51,7 +53,7 @@ console.log(event.headers['sanity-webhook-signature']);
             console.log('Expected Digest (from function):', digest);
             console.log('Received Signature (from Sanity - v1 part):', signatureToCompare); // Now logs just the v1 part
             console.log('Length of SANITY_GH_ACTIONS_WEBHOOK_SECRET (in func):', SANITY_GH_ACTIONS_WEBHOOK_SECRET.length);
-            console.log('ALL INCOMING HEADERS:', event.headers); // Keep for now
+            //console.log('ALL INCOMING HEADERS:', event.headers); // Keep for now
             console.log('--- End Sanity Signature Debugging ---');
 
             // --- MODIFIED COMPARISON ---
