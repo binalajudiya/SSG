@@ -34,6 +34,8 @@ graph TD
         F2[Live Site Secondary_Staging:<br>Cloudways Server]
     end
 
+    <!-- ADD BLANK LINE HERE -->
+
     %% Flow connections
     A --on Publish--> B1;
     A --on Publish--> B2;
