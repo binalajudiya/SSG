@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@sanity/client": "^6.28.3",
-    "@sanity/webhook": "^4.0.4",
     "next": "15.2.1",
     "next-sanity": "^9.9.0",
     "node-fetch": "^2.7.0",
