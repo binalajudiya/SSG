@@ -28,8 +28,8 @@ exports.handler = async function(event, context) {
     
 
     try {
-        const body = JSON.parse(event.body);
-        console.log('Parsed body:', body); // Log the parsed body for debugging
+        // const body = JSON.parse(event.body);
+        // console.log('Parsed body:', body); // Log the parsed body for debugging
         // --- Sanity Webhook Secret Verification (with all header logs) ---
         if (SANITY_GH_ACTIONS_WEBHOOK_SECRET) {
             const hmac = crypto.createHmac('sha256', SANITY_GH_ACTIONS_WEBHOOK_SECRET);
@@ -48,7 +48,7 @@ exports.handler = async function(event, context) {
                     signatureToCompare = v1Part.substring(3); // Extract the part after 'v1='
                 }
             }
-            // --- END NEW CODE ---
+            // --- END NEW CODE --- 
 
             console.log('--- Sanity Signature Debugging ---');
             console.log('Expected Digest (from function):', digest);
