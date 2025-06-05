@@ -30,7 +30,7 @@ exports.handler = async function(event, context) {
     console.log('Event source:', event.headers['sanity-webhook-signature']); // Log the Sanity webhook signature for debugging
 
     try {
-        const body = JSON.parse(event.body);
+        //const body = JSON.parse(event.body);
 
         // --- Sanity Webhook Secret Verification (with all header logs) ---
         if (SANITY_GH_ACTIONS_WEBHOOK_SECRET) {
