@@ -61,8 +61,7 @@ exports.handler = async function(event, context) {
 
         console.log('Received Sanity webhook. Triggering GitHub Actions workflow...');
 
-        const response = await fetch(`https://api.github.com/repos/<span class="math-inline">\{GITHUB\_OWNER\}/</span>{GITHUB_REPO}/actions/workflows/${GITHUB_WORKFLOW_FILE}/dispatches`, {
-            method: 'POST',
+        const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${GITHUB_WORKFLOW_FILE}/dispatches`, {                method: 'POST',
             headers: {
                 'Authorization': `Bearer ${GITHUB_TOKEN}`,
                 'Accept': 'application/vnd.github.v3+json',
