@@ -31,7 +31,7 @@ jobs:
         with:
           github_token: ${{ secrets.GH_PAGES_TOKEN }} # GitHub's built-in token for authentication
           publish_dir: ./out # The directory containing your static build output
-          commit_message: "🚀 Deploying from main branch - Commit ${{ github.sha }}" # Custom message
+          commit_message: "🚀 Automated deployment from Sanity content update - Commit ${{ github.sha }}" # Custom message
 
           # publish_branch: gh-pages # Default. You can change this if you want a different branch name (e.g., 'dist')
           # force_orphan: true # Uncomment this if you want to completely overwrite the branch history each time
