@@ -28,41 +28,36 @@ exports.handler = async function(event, context) {
     
 
     try {
-        const body = JSON.parse(event.body);
-        // --- Sanity Webhook Secret Verification (with all header logs) ---
-        if (SANITY_GH_ACTIONS_WEBHOOK_SECRET) {
-            const hmac = crypto.createHmac('sha256', SANITY_GH_ACTIONS_WEBHOOK_SECRET);
-            let digest = hmac.update(event.body).digest('base64'); // Use RAW event.body
-            // Convert to base64url (replace + with -, / with _, remove =)
-            digest = digest.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        const rawBody = event.body; 
 
-            // --- NEW CODE TO PARSE THE SIGNATURE HEADER ---
-            const receivedSignatureHeader = event.headers['sanity-webhook-signature'] || event.headers['Sanity-Webhook-Signature'];
-            console.log('Received Signature Header:', receivedSignatureHeader); // Log the received signature header for debugging
-            let signatureToCompare;
-            if (receivedSignatureHeader) {
-                const parts = receivedSignatureHeader.split(',').map(part => part.trim());
-                const v1Part = parts.find(part => part.startsWith('v1='));
-                if (v1Part) {
-                    signatureToCompare = v1Part.substring(3); // Extract the part after 'v1='
-                }
-            }
-            // --- END NEW CODE ---
+        // --- Sanity Webhook Secret Verification using @sanity/webhook ---
+        if (!SANITY_WEBHOOK_SECRET) {
+            console.error('SANITY_WEBHOOK_SECRET is not set in Netlify environment variables.');
+            return { statusCode: 500, body: 'Server configuration error: Sanity secret missing.' };
+        }
 
-            console.log('--- Sanity Signature Debugging ---');
-            console.log('Expected Digest (from function):', digest);
-            console.log('Received Signature (from Sanity - v1 part):', signatureToCompare); // Now logs just the v1 part
-            console.log('Length of SANITY_GH_ACTIONS_WEBHOOK_SECRET (in func):', SANITY_GH_ACTIONS_WEBHOOK_SECRET.length);
-            //console.log('ALL INCOMING HEADERS:', event.headers); // Keep for now
-            console.log('--- End Sanity Signature Debugging ---');
+        try {
+            // This is the core verification step
+            const isValidSignature = await verifyWebhook({
+                body: rawBody,                     // The raw request body
+                signature: event.headers['sanity-webhook-signature'], // The full signature header
+                secret: SANITY_WEBHOOK_SECRET,      // Your secret string
+            });
 
-            // --- MODIFIED COMPARISON ---
-            if (!signatureToCompare || signatureToCompare !== digest) {
-                console.warn('Sanity webhook signature mismatch!');
+            if (!isValidSignature) {
+                console.warn('Sanity webhook signature mismatch! (via @sanity/webhook)');
                 return { statusCode: 401, body: 'Unauthorized: Invalid Sanity signature' };
             }
+            console.log('Sanity webhook signature successfully verified!');
+
+        } catch (err) {
+            console.error('Error verifying Sanity webhook signature:', err.message);
+            return { statusCode: 401, body: `Unauthorized: Signature verification failed: ${err.message}` };
         }
-        // --- End Sanity Webhook Secret Verification ---
+        // --- End Sanity Webhook Verification ---
+
+        // Now, parse the body, as it's guaranteed to be valid
+        const body = JSON.parse(rawBody); 
 
         console.log('Received Sanity webhook. Triggering GitHub Actions workflow...');
 
