@@ -1,3 +1,8 @@
+# My Deployment Workflow
+
+Here's a diagram illustrating our automated deployment process:
+
+```mermaid
 graph TD
     %% Define main components/subgraphs
     subgraph Sanity Studio (CMS)
@@ -39,8 +44,8 @@ graph TD
     A -- on Publish --> B2;
 
     B1 -- POST webhook --> C1;
-    C1 -- pulls source code --> D1;
-    C1 -- builds & deploys --> F1;
+    C1 -- (pulls source code) --> D1;
+    C1 -- (builds & deploys) --> F1;
 
     B2 -- POST webhook --> C2;
     C2 -- (receives webhook & verifies) --> C3;
@@ -59,6 +64,7 @@ graph TD
     E1 -- pulls from --> D3;
     E1 -- (runs post-pull commands:<br>npm install, npm build) --> F2;
 
+
     %% Add specific labels for data/secrets
     B1 -. Secret: SANITY_WEBHOOK_SECRET .- C1;
     B2 -. Secret: SANITY_GH_ACTIONS_WEBHOOK_SECRET .- C2;
@@ -67,3 +73,8 @@ graph TD
     D5 -. Holds: GH_PAGES_TOKEN,<br>GITHUB_ACTION_DEPLOY_TEMP_V3 .- D2;
     D4 -. Parameters: server_id, app_id,<br>git_url, branch_name .- E2;
     E2 -. Uses: API_KEY, EMAIL .- E3;
+    ```
+
+    ## Detailed Documentation
+
+    (The rest of your detailed documentation goes here)
