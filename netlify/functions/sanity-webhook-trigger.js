@@ -2,10 +2,7 @@
 const fetch = require('node-fetch');
 const crypto = require('crypto');
 
-// This will hold the entire module export
-const sanityWebhookModule = require('@sanity/webhook');
-// Now, explicitly access the verifyWebhook property from the module
-const verifyWebhook = sanityWebhookModule.verifyWebhook;
+const { isValidSignature } = require('@sanity/webhook');
 
 
 
@@ -45,14 +42,11 @@ exports.handler = async function(event, context) {
 
         try {
             // This is the core verification step
-            const isValidSignature = await verifyWebhook({
-                body: rawBody,                     // The raw request body
-                signature: event.headers['sanity-webhook-signature'], // The full signature header
-                secret: SANITY_GH_ACTIONS_WEBHOOK_SECRET,      // Your secret string
-            });
+            const signature = event.headers['sanity-webhook-signature'];
+            const isValid = isValidSignature(rawBody, signature, SANITY_GH_ACTIONS_WEBHOOK_SECRET);
 
-            if (!isValidSignature) {
-                console.warn('Sanity webhook signature mismatch! (via @sanity/webhook)');
+            if (!isValid) {
+                console.warn('Sanity webhook signature mismatch!');
                 return { statusCode: 401, body: 'Unauthorized: Invalid Sanity signature' };
             }
             console.log('Sanity webhook signature successfully verified!');
