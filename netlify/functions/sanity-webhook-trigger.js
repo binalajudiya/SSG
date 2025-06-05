@@ -39,22 +39,24 @@ exports.handler = async function(event, context) {
         if (SANITY_GH_ACTIONS_WEBHOOK_SECRET) {
             const receivedSignatureHeader = event.headers['sanity-webhook-signature'];
 
-            // --- NEW DEBUGGING LOGS ---
-            // Log a hash of the secret string (NEVER log the secret directly!)
             const secretHash = crypto.createHash('sha256').update(SANITY_GH_ACTIONS_WEBHOOK_SECRET).digest('hex');
-            console.log('Secret Hash (in func):', secretHash);
-            // console.log('Raw Event Body (for debugging):', event.body); // UNCOMMENT WITH EXTREME CAUTION (sensitive data)
-            // --- END NEW DEBUGGING LOGS ---
+            console.log('Secret Hash (in func):', secretHash); // Verify this hash matches your secret
 
             const hmac = crypto.createHmac('sha256', SANITY_GH_ACTIONS_WEBHOOK_SECRET);
 
-            // --- CRITICAL CHANGE: Explicitly convert event.body to a Buffer for hashing ---
-            const rawBodyBuffer = Buffer.from(event.body, 'utf8');
-            const rawDigestBase64 = hmac.update(rawBodyBuffer).digest('base64');
+            // --- CRITICAL CHANGE: Try different body normalizations ---
+            // Try hashing the body directly as a Buffer (your current state)
+            const bodyToHash = Buffer.from(event.body, 'utf8');
+
+            // If that doesn't work, try adding a newline (some systems sign with trailing newline)
+            // const bodyToHash = Buffer.from(event.body + '\n', 'utf8'); 
+
+            // If that doesn't work, try trimming any whitespace (leading/trailing)
+            // const bodyToHash = Buffer.from(event.body.trim(), 'utf8'); 
             // --- END CRITICAL CHANGE ---
 
+            const rawDigestBase64 = hmac.update(bodyToHash).digest('base64');
             const digest = toBase64url(rawDigestBase64);
-            // --- END NEW CODE --- 
 
             let signatureToCompare;
             if (receivedSignatureHeader) {
