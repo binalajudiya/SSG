@@ -2,6 +2,11 @@
 const fetch = require('node-fetch');
 const crypto = require('crypto'); // Ensure crypto is imported
 
+// Helper function to convert standard base64 to URL-safe base64 (base64url)
+function toBase64url(base64string) {
+  return base64string.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
 // Replace with your GitHub details
 const GITHUB_OWNER = 'binalajudiya'; // Your GitHub username/organization
 const GITHUB_REPO = 'SSG';          // Your GitHub repository name
@@ -32,29 +37,39 @@ exports.handler = async function(event, context) {
         // console.log('Parsed body:', body); // Log the parsed body for debugging
         // --- Sanity Webhook Secret Verification (with all header logs) ---
         if (SANITY_GH_ACTIONS_WEBHOOK_SECRET) {
-            const hmac = crypto.createHmac('sha256', SANITY_GH_ACTIONS_WEBHOOK_SECRET);
-            let digest = hmac.update(event.body).digest('base64'); // Use RAW event.body
-            // Convert to base64url (replace + with -, / with _, remove =)
-            digest = digest.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            const receivedSignatureHeader = event.headers['sanity-webhook-signature'];
 
-            // --- NEW CODE TO PARSE THE SIGNATURE HEADER ---
-            const receivedSignatureHeader = event.headers['sanity-webhook-signature'] || event.headers['Sanity-Webhook-Signature'];
-            console.log('Received Signature Header:', receivedSignatureHeader); // Log the received signature header for debugging
+            // --- NEW DEBUGGING LOGS ---
+            // Log a hash of the secret string (NEVER log the secret directly!)
+            const secretHash = crypto.createHash('sha256').update(SANITY_WEBHOOK_SECRET).digest('hex');
+            console.log('Secret Hash (in func):', secretHash);
+            // console.log('Raw Event Body (for debugging):', event.body); // UNCOMMENT WITH EXTREME CAUTION (sensitive data)
+            // --- END NEW DEBUGGING LOGS ---
+
+            const hmac = crypto.createHmac('sha256', SANITY_WEBHOOK_SECRET);
+
+            // --- CRITICAL CHANGE: Explicitly convert event.body to a Buffer for hashing ---
+            const rawBodyBuffer = Buffer.from(event.body, 'utf8');
+            const rawDigestBase64 = hmac.update(rawBodyBuffer).digest('base64');
+            // --- END CRITICAL CHANGE ---
+
+            const digest = toBase64url(rawDigestBase64);
+            // --- END NEW CODE --- 
+
             let signatureToCompare;
             if (receivedSignatureHeader) {
                 const parts = receivedSignatureHeader.split(',').map(part => part.trim());
                 const v1Part = parts.find(part => part.startsWith('v1='));
                 if (v1Part) {
-                    signatureToCompare = v1Part.substring(3); // Extract the part after 'v1='
+                    signatureToCompare = v1Part.substring(3);
                 }
             }
-            // --- END NEW CODE --- 
 
             console.log('--- Sanity Signature Debugging ---');
             console.log('Expected Digest (from function):', digest);
-            console.log('Received Signature (from Sanity - v1 part):', signatureToCompare); // Now logs just the v1 part
-            console.log('Length of SANITY_GH_ACTIONS_WEBHOOK_SECRET (in func):', SANITY_GH_ACTIONS_WEBHOOK_SECRET.length);
-            //console.log('ALL INCOMING HEADERS:', event.headers); // Keep for now
+            console.log('Received Signature (from Sanity - v1 part):', signatureToCompare);
+            console.log('Length of SANITY_WEBHOOK_SECRET (in func):', SANITY_WEBHOOK_SECRET.length);
+            console.log('ALL INCOMING HEADERS:', event.headers);
             console.log('--- End Sanity Signature Debugging ---');
 
             // --- MODIFIED COMPARISON ---
