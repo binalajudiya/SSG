@@ -73,7 +73,3 @@ graph TD
     D4 -. Parameters: server_id, app_id,<br>git_url, branch_name .- E2;
     E2 -. Uses: API_KEY, EMAIL .- E3;
     ```
-
-    ## Detailed Documentation
-
-    (The rest of your detailed documentation goes here)
