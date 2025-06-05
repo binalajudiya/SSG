@@ -31,8 +31,8 @@ exports.handler = async function(event, context) {
         const rawBody = event.body; 
 
         // --- Sanity Webhook Secret Verification using @sanity/webhook ---
-        if (!SANITY_WEBHOOK_SECRET) {
-            console.error('SANITY_WEBHOOK_SECRET is not set in Netlify environment variables.');
+        if (!SANITY_GH_ACTIONS_WEBHOOK_SECRET) {
+            console.error('SANITY_GH_ACTIONS_WEBHOOK_SECRET is not set in Netlify environment variables.');
             return { statusCode: 500, body: 'Server configuration error: Sanity secret missing.' };
         }
 
@@ -41,7 +41,7 @@ exports.handler = async function(event, context) {
             const isValidSignature = await verifyWebhook({
                 body: rawBody,                     // The raw request body
                 signature: event.headers['sanity-webhook-signature'], // The full signature header
-                secret: SANITY_WEBHOOK_SECRET,      // Your secret string
+                secret: SANITY_GH_ACTIONS_WEBHOOK_SECRET,      // Your secret string
             });
 
             if (!isValidSignature) {
