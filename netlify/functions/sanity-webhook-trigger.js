@@ -41,12 +41,12 @@ exports.handler = async function(event, context) {
 
             // --- NEW DEBUGGING LOGS ---
             // Log a hash of the secret string (NEVER log the secret directly!)
-            const secretHash = crypto.createHash('sha256').update(SANITY_WEBHOOK_SECRET).digest('hex');
+            const secretHash = crypto.createHash('sha256').update(SANITY_GH_ACTIONS_WEBHOOK_SECRET).digest('hex');
             console.log('Secret Hash (in func):', secretHash);
             // console.log('Raw Event Body (for debugging):', event.body); // UNCOMMENT WITH EXTREME CAUTION (sensitive data)
             // --- END NEW DEBUGGING LOGS ---
 
-            const hmac = crypto.createHmac('sha256', SANITY_WEBHOOK_SECRET);
+            const hmac = crypto.createHmac('sha256', SANITY_GH_ACTIONS_WEBHOOK_SECRET);
 
             // --- CRITICAL CHANGE: Explicitly convert event.body to a Buffer for hashing ---
             const rawBodyBuffer = Buffer.from(event.body, 'utf8');
@@ -68,7 +68,7 @@ exports.handler = async function(event, context) {
             console.log('--- Sanity Signature Debugging ---');
             console.log('Expected Digest (from function):', digest);
             console.log('Received Signature (from Sanity - v1 part):', signatureToCompare);
-            console.log('Length of SANITY_WEBHOOK_SECRET (in func):', SANITY_WEBHOOK_SECRET.length);
+            console.log('Length of SANITY_GH_ACTIONS_WEBHOOK_SECRET (in func):', SANITY_GH_ACTIONS_WEBHOOK_SECRET.length);
             console.log('ALL INCOMING HEADERS:', event.headers);
             console.log('--- End Sanity Signature Debugging ---');
 
