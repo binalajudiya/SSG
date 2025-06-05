@@ -29,7 +29,7 @@ exports.handler = async function(event, context) {
 
     try {
         //const body = JSON.parse(event.body);
-
+console.log(event.headers['sanity-webhook-signature']);
         // --- Sanity Webhook Secret Verification (with all header logs) ---
         if (SANITY_GH_ACTIONS_WEBHOOK_SECRET) {
             const receivedSignatureHeader = event.headers['sanity-webhook-signature']; // Get the full header string
