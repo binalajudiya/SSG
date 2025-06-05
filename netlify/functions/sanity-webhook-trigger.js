@@ -32,7 +32,7 @@ exports.handler = async function(event, context) {
         // --- Sanity Webhook Secret Verification (with all header logs) ---
         if (SANITY_GH_ACTIONS_WEBHOOK_SECRET) {
             const hmac = crypto.createHmac('sha256', SANITY_GH_ACTIONS_WEBHOOK_SECRET);
-            const digest = hmac.update(event.body).digest('base64'); // Use RAW event.body
+            let digest = hmac.update(event.body).digest('base64'); // Use RAW event.body
             // Convert to base64url (replace + with -, / with _, remove =)
             digest = digest.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
