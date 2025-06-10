@@ -59,6 +59,8 @@ export async function getStaticProps() {
 }
 
 export default function Home({ table, assets }) {
+  // console.log("Table data:", table);
+  // console.log("Assets data:", assets);
   if (!table) {
     return <div>Loading...</div>;
   }
